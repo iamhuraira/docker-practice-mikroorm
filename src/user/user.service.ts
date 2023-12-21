@@ -15,7 +15,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 export class UserService {
   constructor(
     @InjectRepository(User) private readonly userRepository: EntityRepository<User>,
-    // private readonly userRepository: UserRepository,
+    private readonly em: EntityManager
   ) { }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -24,7 +24,7 @@ export class UserService {
     user.lastName = createUserDto.lastName;
     user.age = createUserDto.age;
     const newUser = this.userRepository.create(user);
-    await this.userRepository.persistAndFlush(newUser);
+    await this.em.persistAndFlush(newUser);
     return newUser;
   }
 
@@ -38,12 +38,12 @@ export class UserService {
   async update(id: number, updateUserDto: UpdateUserDto) {
     const existingUser = await this.findOne(id);
     wrap(existingUser).assign(updateUserDto);
-    await this.userRepository.persistAndFlush(existingUser);
+    await this.em.persistAndFlush(existingUser);
     return existingUser;
   }
 
   async remove(id: number) {
     const post = await this.findOne(id);
-    return this.userRepository.removeAndFlush(post);
+    return this.em.removeAndFlush(post);
   }
 }
